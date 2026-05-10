@@ -54,32 +54,62 @@ body {
   z-index: 5;
 }
 
-/* 提示文字 */
+/* 引导提示文字 */
 .tip {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: rgba(255,255,255,0.7);
-  font-size: 18px;
+  color: rgba(255,255,255,0.85);
+  font-size: 20px;
   text-align: center;
   pointer-events: none;
   z-index: 3;
-  transition: opacity 1s;
+  transition: opacity 1.2s ease;
+  text-shadow: 0 0 10px #fff;
+  line-height: 1.8;
 }
 </style>
 </head>
 
 <body>
 
+<audio id="bgMusic" loop preload="auto">
+  <source src="https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3" type="audio/mpeg">
+
+<audio id="findSound" preload="auto">
+  <source src="https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_50KB_MP3.mp3" type="audio/mpeg">
+
+
 <canvas id="threeCanvas"></canvas>
 <div class="petal-wrap"></div>
 <canvas id="heartCanvas"></canvas>
-<div class="tip">拖动屏幕，在星空中寻找祝福 ✨</div>
+<div class="tip">向左缓缓拖动屏幕<br>在星空身后藏着专属祝福 ✨</div>
 
 <script type="module">
 import * as THREE from "https://cdn.skypack.dev/three@0.136.0";
 import { OrbitControls } from "https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls";
+
+// 音效
+const bgMusic = document.getElementById('bgMusic');
+const findSound = document.getElementById('findSound');
+let musicPlayed = false;
+
+// 手势任意触发背景音乐（解决浏览器自动播放限制）
+document.addEventListener('touchstart', ()=>{
+  if(!musicPlayed){
+    bgMusic.volume = 0.3;
+    bgMusic.play();
+    musicPlayed = true;
+  }
+}, {once:false});
+document.addEventListener('mousedown', ()=>{
+  if(!musicPlayed){
+    bgMusic.volume = 0.3;
+    bgMusic.play();
+    musicPlayed = true;
+  }
+}, {once:false});
 
 // 场景
 let scene = new THREE.Scene();
@@ -98,7 +128,7 @@ window.addEventListener("resize", () => {
   renderer.setSize(innerWidth, innerHeight);
 });
 
-// 手势控制（拖拽旋转视角）
+// 手势控制
 let controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.enablePan = false;
@@ -107,20 +137,17 @@ controls.minDistance = 12;
 controls.maxDistance = 45;
 controls.autoRotate = false;
 
-// ==========================
-// 隐藏的文字面板（初始不在视野 + 完全透明）
-// ==========================
+// 隐藏文字组 初始隐身
 const cardGroup = new THREE.Group();
 cardGroup.position.set(0, 0, -30);
 scene.add(cardGroup);
 
-// 祝福文字画布（无白底）
+// 祝福文字画布 无白底
 const textCanvas = document.createElement('canvas');
 const ctxText = textCanvas.getContext('2d');
 textCanvas.width = 1024;
 textCanvas.height = 768;
 
-// 绘制文字
 ctxText.fillStyle = '#ffd1e8';
 ctxText.font = '60px Arial';
 ctxText.textAlign = 'center';
@@ -148,9 +175,7 @@ const planeGeometry = new THREE.PlaneGeometry(14, 10);
 const textPlane = new THREE.Mesh(planeGeometry, textMaterial);
 cardGroup.add(textPlane);
 
-// ==========================
 // 星空粒子
-// ==========================
 let gu = { time: { value: 0 } };
 let sizes = [];
 let shift = [];
@@ -224,7 +249,7 @@ let clock = new THREE.Clock();
 let tip = document.querySelector('.tip');
 let isFound = false;
 
-// 花瓣
+// 花瓣飘落
 function petal() {
   let w = document.querySelector('.petal-wrap');
   let p = document.createElement('div');
@@ -239,7 +264,7 @@ function petal() {
 }
 setInterval(petal, 500);
 
-// 鼠标爱心
+// 鼠标跟随爱心
 let h = [];
 let hCanvas = document.getElementById('heartCanvas');
 let hCtx = hCanvas.getContext('2d');
@@ -270,7 +295,7 @@ function drawH() {
 }
 drawH();
 
-// 渲染：视角靠近文字时 发光显现
+// 渲染动画
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
@@ -278,11 +303,14 @@ function animate() {
   gu.time.value = t * Math.PI;
   stars.rotation.y = t * 0.05;
 
-  // 视角检测：转到后方 → 文字温柔发光显现
+  // 调低判定阈值，更容易转到视角看到文字
   let angle = controls.getAzimuthalAngle();
-  if (angle < -1.2 && !isFound) {
+  if (angle < -0.8 && !isFound) {
     isFound = true;
-    // 平滑渐显 + 发光效果
+    // 播放找到祝福音效
+    findSound.volume = 0.5;
+    findSound.play();
+    // 文字柔光渐显
     let fadeIn = () => {
       if (textPlane.material.opacity < 1) {
         textPlane.material.opacity += 0.012;
@@ -290,6 +318,7 @@ function animate() {
       }
     };
     fadeIn();
+    // 提示慢慢消失
     tip.style.opacity = 0;
   }
 
