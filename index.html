@@ -154,28 +154,6 @@ body {
   cursor: pointer;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
 }
-.music-control {
-  position: fixed;
-  right: 18px;
-  top: 18px;
-  z-index: 6;
-  padding: 10px 16px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.12);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.18);
-  backdrop-filter: blur(12px);
-  cursor: pointer;
-  font-size: 14px;
-  transition: transform 0.2s ease, background 0.2s ease;
-}
-.music-control:hover {
-  transform: translateY(-1px);
-  background: rgba(255,255,255,0.18);
-}
-.music-control.active {
-  background: rgba(255,255,255,0.22);
-}
 </style>
 </head>
 
@@ -184,7 +162,6 @@ body {
 <canvas id="threeCanvas"></canvas>
 <div class="petal-wrap"></div>
 <canvas id="heartCanvas"></canvas>
-<div class="music-control" id="musicControl">播放BGM</div>
 <div class="tip"><span class="tip-main">向左拖动，寻找星空中的隐藏祝福 ✨</span><span class="hint">当提示变成“找到隐藏祝福”时，就靠近它。</span></div>
 <div class="reader-overlay" id="readerOverlay">
   <div class="reader-card">
@@ -358,10 +335,8 @@ let tipMain = tip.querySelector('.tip-main');
 let tipHint = tip.querySelector('.hint');
 let readerOverlay = document.getElementById('readerOverlay');
 let readerClose = document.getElementById('readerClose');
-let musicControl = document.getElementById('musicControl');
 let audioCtx = null;
 let masterGain = null;
-let bgmPlaying = false;
 let bgmPulse = null;
 let isFound = false;
 let readerOpen = false;
@@ -440,36 +415,11 @@ function initBgm() {
   setTimeout(() => {
     masterGain.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 5);
   }, 20);
-
-  bgmPlaying = true;
-  musicControl.classList.add('active');
-  musicControl.textContent = '暂停BGM';
 }
 
-function toggleBgm() {
-  if (!audioCtx) {
-    initBgm();
-    return;
-  }
-  if (!bgmPlaying) {
-    audioCtx.resume();
-    masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
-    masterGain.gain.setValueAtTime(masterGain.gain.value, audioCtx.currentTime);
-    masterGain.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 1.2);
-    musicControl.classList.add('active');
-    musicControl.textContent = '暂停BGM';
-    bgmPlaying = true;
-  } else {
-    masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
-    masterGain.gain.setValueAtTime(masterGain.gain.value, audioCtx.currentTime);
-    masterGain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 1.2);
-    musicControl.classList.remove('active');
-    musicControl.textContent = '播放BGM';
-    bgmPlaying = false;
-  }
-}
-
-musicControl.addEventListener('click', toggleBgm);
+window.addEventListener('pointerdown', () => {
+  if (!audioCtx) initBgm();
+}, { once: true });
 
 function tryOpenReader() {
   if (isFound && !readerOpen) {
