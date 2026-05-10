@@ -2,68 +2,26 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>母亲节快乐</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Ma+Shan+Zheng&family=ZCOOL+KuaiLe&family=Noto+Serif+SC:wght@700&family=Long+Cang&family=ZCOOL+XiaoWei&family=Liu+Jian+Mao+Cao&family=Open+Sans:ital,wght@1,800&display=swap" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>母亲节快乐 · 在星空中寻找爱</title>
 <style>
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-
 body {
-  font-family: "微软雅黑", sans-serif;
-  background: #ffc8d8;
-  min-height: 100vh;
   overflow: hidden;
-  transition: background 0.5s;
+  background: #0a001a;
 }
 
-.full-decor {
+#threeCanvas {
   position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-.stickers {
-  position: absolute;
-  font-size: 26px;
-  animation: float 3s infinite alternate ease-in-out;
-}
-.bow1 { top:5%; left:8%; }
-.bow2 { top:12%; right:10%; }
-.flower1 { bottom:10%; left:5%; }
-.flower2 { top:30%; left:12%; }
-.flower3 { top:18%; left:18%; }
-.heart1 { bottom:20%; right:8%; }
-.heart2 { top:60%; left:70%; }
-.star1 { top:22%; right:25%; }
-.star2 { bottom:30%; left:20%; }
-.cake1 { bottom:8%; right:15%; }
-.gift1 { top:25%; right:18%; }
-
-@keyframes float {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-8px); }
-}
-
-.big-bouquet {
-  position: absolute;
-  top: 12%;
-  left: 3%;
-  font-size: 24px;
-  line-height: 1.6;
-  animation: float 3.5s infinite alternate;
-  z-index: 1;
-}
-.big-bouquet.right {
-  left: auto;
-  right: 3%;
+  z-index: 0;
 }
 
 .petal-wrap {
@@ -86,537 +44,258 @@ body {
   100% { transform: translateY(100vh) rotate(360deg); opacity:0; }
 }
 
-.page-wrap {
+#heartCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
-  position: relative;
-  z-index: 10;
-}
-.page {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  visibility: hidden;
-  transition: 0.8s;
-  padding: 25px;
-}
-.page.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-.card {
-  background: rgba(255,255,255,0.45);
-  backdrop-filter: blur(12px);
-  padding: 50px 35px;
-  border-radius: 24px;
-  box-shadow: 0 10px 40px rgba(200,100,150,0.25);
-  max-width: 92%;
-  position: relative;
-}
-
-.title {
-  font-size: 40px;
-  color: #d9598c;
-  font-weight: bold;
-  margin-bottom: 25px;
-}
-.title.big { font-size: 48px; }
-.text {
-  font-size: 24px;
-  color: #624250;
-  margin: 10px 0;
-}
-.text.love { color: #ff5a8c; }
-
-.edit-text {
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 6px;
-}
-.edit-text.active { background: rgba(255,180,200,0.5); }
-
-.custom-text-wrap {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
   pointer-events: none;
+  z-index: 5;
 }
-.custom-text-item, .sticker-item {
-  position: absolute;
-  cursor: move;
-  pointer-events: auto;
-  user-select: none;
-}
-.custom-text-item.active, .sticker-item.active {
-  background: rgba(255,180,200,0.3);
-  border-radius: 4px;
-}
-
-.art-glow { text-shadow: 0 0 10px #ff5a8c; }
-.art-stroke { -webkit-text-stroke:1px #d9598c; }
-.art-gradient { background:linear-gradient(45deg,#ff5a8c,#d9598c);-webkit-background-clip:text;color:transparent; }
-.art-shadow { text-shadow: 3px 3px 5px rgba(0,0,0,0.3); }
-
-.img-box { margin-top:25px; position:relative; min-height:100px; }
-.drag-img { position:absolute; border-radius:14px; box-shadow:0 5px 20px rgba(0,0,0,0.2); cursor:move; }
-.del-btn { position:absolute; top:-18px; right:-18px; width:26px; height:26px; background:#ff4470; color:white; border-radius:50%; text-align:center; line-height:26px; cursor:pointer; }
-
-.next {
-  margin-top:45px; padding:14px 36px; background:#ff8fb8; color:white; border:none; border-radius:50px; cursor:pointer;
-}
-
-.edit-btn {
-  position:fixed; right:20px; bottom:25px;
-  width:50px; height:50px;
-  background:#ff5a8c; color:white;
-  border-radius:50%; z-index:998;
-  cursor:pointer; display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:20px; box-shadow:0 4px 12px rgba(255,90,140,0.3);
-}
-
-.edit-panel {
-  position:fixed; right:20px; top:50%; transform:translateY(-50%);
-  width:320px; max-height:90vh;
-  background:white; border-radius:16px;
-  box-shadow:0 8px 30px rgba(0,0,0,0.2);
-  z-index:999; overflow:hidden;
-  display:none; flex-direction:column;
-}
-.edit-panel.show { display:flex; }
-
-.head {
-  padding:12px 15px; background:#ff5a8c;
-  color:white; display:flex; justify-content:space-between;
-  align-items:center; cursor:move;
-}
-.head span { font-weight:bold; }
-.min-btn, .close {
-  cursor:pointer; margin-left:10px; font-size:18px;
-}
-
-.panel-body {
-  padding:15px; overflow-y:auto; max-height:calc(90vh - 50px);
-}
-.item { margin:10px 0; }
-.item label { font-size:14px; color:#555; }
-.item input, .item button, .item select {
-  width:100%; padding:8px; margin-top:5px; border:1px solid #ddd; border-radius:6px;
-}
-.item button { background:#ffc0cb; border:none; cursor:pointer; }
-
-.panel-mini {
-  position:fixed; right:20px; top:50%; transform:translateY(-50%);
-  background:#ff5a8c; color:white; padding:10px 15px;
-  border-radius:30px; z-index:999; cursor:pointer;
-  box-shadow:0 4px 12px rgba(255,90,140,0.3);
-  display:none;
-}
-.panel-mini.show { display:block; }
-
-#heartCanvas { position:fixed; top:0; left:0; width:100vw; height:100vh; pointer-events:none; z-index:5; }
 </style>
 </head>
 
 <body>
 
-<div class="full-decor">
-  <div class="stickers bow1">🎀</div>
-  <div class="stickers bow2">🎀</div>
-  <div class="stickers flower1">🌸</div>
-  <div class="stickers flower2">💐</div>
-  <div class="stickers flower3">🌹</div>
-  <div class="stickers heart1">💗</div>
-  <div class="stickers heart2">💖</div>
-  <div class="stickers star1">✨</div>
-  <div class="stickers star2">⭐</div>
-  <div class="stickers cake1">🍰</div>
-  <div class="stickers gift1">🎁</div>
-
-  <div class="big-bouquet left">
-    <div class="r1">🌹🌹🌹</div>
-    <div class="r2">🌹🌹🌹🌹</div>
-    <div class="r3">🌹🌹🌹🌹🌹</div>
-  </div>
-  <div class="big-bouquet right">
-    <div class="r1">💐💐💐</div>
-    <div class="r2">💐💐💐💐</div>
-  </div>
-</div>
-
+<canvas id="threeCanvas"></canvas>
 <div class="petal-wrap"></div>
-
-<div class="page-wrap">
-  <div class="page active">
-    <div class="card">
-      <div class="title edit-text">母亲节快乐</div>
-      <div class="text edit-text">感谢您做我的妈妈</div>
-      <div class="img-box"></div>
-      <div class="custom-text-wrap"></div>
-    </div>
-    <button class="next">下一页</button>
-  </div>
-
-  <div class="page">
-    <div class="card">
-      <div class="text edit-text">小棉袄会努力</div>
-      <div class="text edit-text">成为您的防弹衣</div>
-      <div class="img-box"></div>
-      <div class="custom-text-wrap"></div>
-    </div>
-    <button class="next">下一页</button>
-  </div>
-
-  <div class="page">
-    <div class="card">
-      <div class="text edit-text">全世界都在催我长大</div>
-      <div class="text edit-text">您却心疼我的小翅膀</div>
-      <div class="img-box"></div>
-      <div class="custom-text-wrap"></div>
-    </div>
-    <button class="next">下一页</button>
-  </div>
-
-  <div class="page">
-    <div class="card">
-      <div class="text edit-text">我从未让您骄傲</div>
-      <div class="text edit-text">您却待我如宝</div>
-      <div class="img-box"></div>
-      <div class="custom-text-wrap"></div>
-    </div>
-    <button class="next">下一页</button>
-  </div>
-
-  <div class="page">
-    <div class="card">
-      <div class="title big edit-text">妈妈</div>
-      <div class="text love edit-text">我爱你</div>
-      <div class="img-box"></div>
-      <div class="custom-text-wrap"></div>
-    </div>
-  </div>
-</div>
-
-<div class="edit-btn">🎨</div>
-
-<div class="edit-panel" id="editPanel">
-  <div class="head" id="panelHead">
-    <span>🎨 编辑面板</span>
-    <div>
-      <span class="min-btn">−</span>
-      <span class="close">×</span>
-    </div>
-  </div>
-  <div class="panel-body">
-    <div class="item"><button id="addNewText">➕ 添加新文字</button></div>
-    <div class="item"><label>文字内容</label><input type="text" id="textInput"><button onclick="saveText()">修改</button></div>
-    <div class="item"><label>大小</label><input type="range" id="fontSizeRange" min="12" max="70" value="24"></div>
-    <div class="item"><label>颜色</label><input type="color" id="textColor"></div>
-
-    <div class="item">
-      <label>🎭 艺术字体</label>
-      <select id="fontFamilySelect">
-        <option value="auto">默认字体</option>
-        <option value="Dancing Script">英文花体</option>
-        <option value="Ma Shan Zheng">马善政书法</option>
-        <option value="Long Cang">仓耳苍</option>
-        <option value="ZCOOL KuaiLe">快乐体</option>
-        <option value="Liu Jian Mao Cao">刘建毛草</option>
-        <option value="Noto Serif SC">宋体艺术</option>
-        <option value="Open Sans">英文粗体</option>
-      </select>
-    </div>
-
-    <div class="item">
-      <label>✨ 艺术字效果</label>
-      <select id="artStyle">
-        <option value="normal">普通</option>
-        <option value="glow">发光</option>
-        <option value="stroke">描边</option>
-        <option value="gradient">渐变</option>
-        <option value="shadow">3D阴影</option>
-      </select>
-    </div>
-
-    <div class="item">
-      <label>🎀 可爱贴纸</label>
-      <select id="stickerSelect">
-        <option value="">选择贴纸</option>
-        <option value="🎀">蝴蝶结</option>
-        <option value="🌹">玫瑰</option>
-        <option value="💐">花束</option>
-        <option value="💖">爱心</option>
-        <option value="✨">星星</option>
-        <option value="🍰">蛋糕</option>
-        <option value="🎁">礼物</option>
-        <option value="💎">钻石</option>
-        <option value="🎈">气球</option>
-      </select>
-      <button id="addSticker">➕ 添加到页面</button>
-    </div>
-
-    <div class="item">
-      <label>🎵 内置背景音乐</label>
-      <select id="bgmSelect">
-        <option value="">选择音乐</option>
-        <option value="https://music.163.com/song/media/outer/url?id=1398122293.mp3">温馨钢琴曲</option>
-        <option value="https://music.163.com/song/media/outer/url?id=1386760129.mp3">治愈音乐</option>
-        <option value="https://music.163.com/song/media/outer/url?id=1402086023.mp3">浪漫轻音乐</option>
-      </select>
-      <button id="playBgm">▶️ 播放</button>
-      <button id="stopBgm">⏹️ 停止</button>
-    </div>
-
-    <div class="item">
-      <label>🔗 粘贴抖音/音乐链接 直接用BGM</label>
-      <input type="text" id="customBgmUrl" placeholder="粘贴抖音、网易云、音乐链接">
-      <button id="playCustomBgm">▶️ 解析并播放</button>
-    </div>
-
-    <div class="item"><button id="delText">🗑️ 删除选中</button></div>
-    <div class="item"><label>背景色</label><input type="color" id="bgColor"></div>
-    <div class="item"><label>背景图</label><input type="file" id="bgFile"></div>
-    <div class="item"><label>插入图片</label><input type="file" id="addImg"></div>
-    <div class="item"><button onclick="clearImgs()">清空图片</button></div>
-  </div>
-</div>
-
-<div class="panel-mini" id="panelMini">🎨 编辑</div>
-
-<audio id="bgmPlayer" loop></audio>
 <canvas id="heartCanvas"></canvas>
 
-<script>
-// 花瓣
-function petal(){
-  let w=document.querySelector('.petal-wrap');
-  let p=document.createElement('div');
-  p.className='petal';
-  let s=Math.random()*8+5;
-  p.style.width=s+'px'; p.style.height=s+'px'; p.style.left=Math.random()*100+'%';
-  p.style.animationDuration=Math.random()*5+6+'s';
-  w.appendChild(p);
-  setTimeout(()=>p.remove(),12000);
-}
-setInterval(petal,450);
+<script type="module">
+import * as THREE from "https://cdn.skypack.dev/three@0.136.0";
+import { OrbitControls } from "https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls";
 
-// 翻页
-let cur=0;
-let pages=document.querySelectorAll('.page');
-document.querySelectorAll('.next').forEach(b=>{
-  b.onclick=()=>{
-    pages[cur].classList.remove('active');
-    cur++; if(cur>=pages.length)cur=0;
-    pages[cur].classList.add('active');
-  }
+// 星空场景
+let scene = new THREE.Scene();
+scene.background = new THREE.Color(0x100020);
+
+let camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 1, 1000);
+camera.position.set(0, 4, 22);
+
+const canvas = document.getElementById("threeCanvas");
+let renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+
+window.addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
 });
 
-// 编辑面板 - 悬浮+拖动+收缩
-const editBtn=document.querySelector('.edit-btn');
-const editPanel=document.getElementById('editPanel');
-const panelHead=document.getElementById('panelHead');
-const panelMini=document.getElementById('panelMini');
-const closeBtn=document.querySelector('.close');
-const minBtn=document.querySelector('.min-btn');
+// 3D交互控制
+let controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.enablePan = false;
+controls.rotateSpeed = 0.4;
+controls.minDistance = 12;
+controls.maxDistance = 45;
 
-editBtn.onclick=()=>{
-  editPanel.classList.add('show');
-  editBtn.style.display='none';
-  panelMini.classList.remove('show');
-};
+// ==========================
+// 核心改造：文字分散融入3D星空空间
+// ==========================
+const messageTexts = [
+  "母亲节快乐",
+  "妈妈，希望您永远不要被“母亲”这个标签所困",
+  "你就应该开心地做自己",
+  "尽情享受作为一个女性的爱与美",
+  "想去看世界便去看世界",
+  "想体验什么便大胆去体验",
+  "不必被目标限制住自己的人生轨迹",
+  "最后，希望您健康、平安、快乐！"
+];
 
-closeBtn.onclick=()=>{
-  editPanel.classList.remove('show');
-  editBtn.style.display='flex';
-};
+const textGroup = new THREE.Group();
+scene.add(textGroup);
 
-minBtn.onclick=()=>{
-  editPanel.classList.remove('show');
-  panelMini.classList.add('show');
-};
+// 生成3D空间文字（随机分布在星空里）
+function createSpaceText() {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = 256;
+  canvas.height = 64;
 
-panelMini.onclick=()=>{
-  editPanel.classList.add('show');
-  panelMini.classList.remove('show');
-};
+  messageTexts.forEach((text, lineIndex) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#ff99bb';
+    ctx.font = 'bold 28px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(text, 128, 40);
 
-let isDragging=false, offsetX, offsetY;
-panelHead.onmousedown=(e)=>{
-  isDragging=true;
-  offsetX=e.clientX-editPanel.offsetLeft;
-  offsetY=e.clientY-editPanel.offsetTop;
-  document.onmousemove=onMouseMove;
-  document.onmouseup=onMouseUp;
-};
-function onMouseMove(e){
-  if(!isDragging)return;
-  editPanel.style.left=e.clientX-offsetX+'px';
-  editPanel.style.top=e.clientY-offsetY+'px';
-  editPanel.style.transform='none';
-}
-function onMouseUp(){
-  isDragging=false;
-  document.onmousemove=null;
-  document.onmouseup=null;
-}
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      opacity: 0.9
+    });
 
-let sel=null;
-function clearSelect(){
-  document.querySelectorAll('.edit-text,.custom-text-item,.sticker-item').forEach(i=>i.classList.remove('active'));
-  sel=null;
-}
+    const plane = new THREE.Mesh(
+      new THREE.PlaneGeometry(8, 2),
+      material
+    );
 
-document.querySelectorAll('.edit-text').forEach(t=>{
-  t.onclick=()=>{ clearSelect(); t.classList.add('active'); sel=t; sync(); }
-});
+    // 随机3D空间位置（散落在星空里）
+    plane.position.set(
+      (Math.random() - 0.5) * 60,
+      (Math.random() - 0.5) * 30,
+      (Math.random() - 0.5) * 60
+    );
 
-function sync(){
-  if(!sel)return;
-  document.getElementById('textInput').value=sel.innerText;
-  document.getElementById('fontSizeRange').value=parseInt(sel.style.fontSize||24);
-  document.getElementById('textColor').value=sel.style.color||'#624250';
-}
+    // 随机角度，更自然融入空间
+    plane.rotation.set(
+      (Math.random() - 0.5) * Math.PI * 0.3,
+      (Math.random() - 0.5) * Math.PI * 0.5,
+      (Math.random() - 0.5) * Math.PI * 0.2
+    );
 
-document.getElementById('addNewText').onclick=()=>{
-  let wrap=pages[cur].querySelector('.custom-text-wrap');
-  let d=document.createElement('div');
-  d.className='custom-text-item';
-  d.innerText='新文字';
-  d.style.left='50%'; d.style.top='60%'; d.style.transform='translateX(-50%)';
-  d.style.fontSize='24px'; d.style.color='#624250';
-
-  d.onclick=()=>{ clearSelect(); d.classList.add('active'); sel=d; sync(); };
-  drag(d);
-  wrap.appendChild(d);
-  clearSelect(); d.click();
-};
-
-function drag(el){
-  let drag=false,sx,sy,ox,oy;
-  el.onmousedown=e=>{
-    drag=true; sx=e.clientX; sy=e.clientY; ox=el.offsetLeft; oy=el.offsetTop;
-    document.onmousemove=ev=>{
-      if(!drag)return;
-      el.style.left=ox+(ev.clientX-sx)+'px';
-      el.style.top=oy+(ev.clientY-sy)+'px';
-      el.style.transform='none';
-    };
-    document.onmouseup=()=>drag=false;
-  };
-}
-
-function saveText(){ if(!sel)return; sel.innerText=document.getElementById('textInput').value; }
-
-document.getElementById('fontSizeRange').oninput=()=>{ if(sel)sel.style.fontSize=document.getElementById('fontSizeRange').value+'px'; };
-
-document.getElementById('textColor').oninput=()=>{ if(sel)sel.style.color=document.getElementById('textColor').value; };
-
-document.getElementById('fontFamilySelect').onchange=()=>{ if(sel)sel.style.fontFamily=document.getElementById('fontFamilySelect').value; };
-
-document.getElementById('artStyle').onchange=()=>{
-  if(!sel)return;
-  sel.classList.remove('art-glow','art-stroke','art-gradient','art-shadow');
-  let v=document.getElementById('artStyle').value;
-  if(v!=='normal')sel.classList.add('art-'+v);
-};
-
-document.getElementById('addSticker').onclick=()=>{
-  let v=document.getElementById('stickerSelect').value;
-  if(!v)return;
-  let wrap=pages[cur].querySelector('.custom-text-wrap');
-  let d=document.createElement('div');
-  d.className='sticker-item';
-  d.innerText=v;
-  d.style.left='50%'; d.style.top='50%'; d.style.transform='translateX(-50%)';
-  d.style.fontSize='40px';
-  d.onclick=()=>{ clearSelect(); d.classList.add('active'); sel=d; };
-  drag(d);
-  wrap.appendChild(d);
-};
-
-document.getElementById('playBgm').onclick=()=>{
-  let u=document.getElementById('bgmSelect').value;
-  if(!u)return alert('请先选择内置音乐');
-  let a=document.getElementById('bgmPlayer');
-  a.src=u;
-  a.play();
-};
-document.getElementById('stopBgm').onclick=()=>{
-  document.getElementById('bgmPlayer').pause();
-};
-
-document.getElementById('playCustomBgm').onclick=()=>{
-  let link = document.getElementById('customBgmUrl').value.trim();
-  if(!link) return alert('请先粘贴抖音/音乐链接');
-
-  let audio = document.getElementById('bgmPlayer');
-  if(link.includes('.mp3')){
-    audio.src = link;
-    audio.play();
-    return;
-  }
-
-  alert('已解析链接，开始播放BGM！\n提示：抖音链接仅支持公开无版权限制背景音乐');
-  audio.src = link;
-  audio.play().catch(()=>{
-    alert('播放失败：该链接受版权限制，请换一个视频/音乐链接');
+    textGroup.add(plane);
   });
-};
-
-document.getElementById('delText').onclick=()=>{ if(sel&&!sel.classList.contains('edit-text'))sel.remove(); clearSelect(); };
-
-document.getElementById('bgColor').oninput=()=>document.body.style.background=document.getElementById('bgColor').value;
-document.getElementById('bgFile').onchange=e=>{
-  let f=e.target.files[0]; if(!f)return;
-  document.body.style.background=`url(${URL.createObjectURL(f)}) center/cover`;
-};
-
-document.getElementById('addImg').onchange=e=>{
-  let f=e.target.files[0]; if(!f)return;
-  let box=pages[cur].querySelector('.img-box');
-  let d=document.createElement('div'); d.className='drag-img';
-  d.style.width='170px'; d.style.left='50%'; d.style.top='50px'; d.style.transform='translateX(-50%)';
-  let i=document.createElement('img'); i.src=URL.createObjectURL(f); i.style.width='100%'; i.style.borderRadius='14px';
-  let del=document.createElement('div'); del.className='del-btn'; del.innerText='×'; del.onclick=()=>d.remove();
-  d.appendChild(i); d.appendChild(del); box.appendChild(d); drag(d);
-};
-
-function clearImgs(){ pages[cur].querySelector('.img-box').innerHTML=''; }
-
-let c=document.getElementById('heartCanvas');
-let ctx=c.getContext('2d');
-function size(){c.width=innerWidth;c.height=innerHeight;}
-size();window.onresize=size;
-let h=[];
-window.onmousemove=e=>{h.push({x:e.x,y:e.y,s:6,a:1});};
-function draw(){
-  ctx.clearRect(0,0,c.width,c.height);
-  for(let i=0;i<h.length;i++){
-    let o=h[i];
-    ctx.save(); ctx.globalAlpha=o.a; ctx.fillStyle='#ff8fb8';
-    ctx.beginPath();
-    ctx.moveTo(o.x,o.y);
-    ctx.bezierCurveTo(o.x-o.s,o.y-o.s*1.5,o.x-o.s*1.5,o.y+o.s/2,o.x,o.y+o.s);
-    ctx.bezierCurveTo(o.x+o.s*1.5,o.y+o.s/2,o.x+o.s,o.y-o.s*1.5,o.x,o.y);
-    ctx.fill();
-    ctx.restore();
-    o.s+=0.15; o.a-=0.015;
-    if(o.a<=0)h.splice(i,1);
-  }
-  requestAnimationFrame(draw);
 }
-draw();
+createSpaceText();
 
-document.addEventListener('click',e=>{
-  if(e.target.classList.contains('card')||e.target.classList.contains('page'))clearSelect();
+// ==========================
+// 星空粒子
+// ==========================
+let gu = { time: { value: 0 } };
+let sizes = [];
+let shift = [];
+
+function pushShift() {
+  shift.push(
+    Math.random() * Math.PI,
+    Math.random() * Math.PI * 2,
+    (Math.random() * 0.9 + 0.1) * Math.PI * 0.1,
+    Math.random() * 0.9 + 0.1
+  );
+}
+
+let pts = new Array(50000).fill().map(() => {
+  sizes.push(Math.random() * 1.5 + 0.5);
+  pushShift();
+  return new THREE.Vector3().randomDirection().multiplyScalar(Math.random() * 0.5 + 9.5);
 });
+
+for (let i = 0; i < 100000; i++) {
+  let r = 10, R = 40;
+  let rand = Math.pow(Math.random(), 1.5);
+  let radius = Math.sqrt(R * R * rand + (1 - rand) * r * r);
+  pts.push(new THREE.Vector3().setFromCylindricalCoords(radius, Math.random() * 2 * Math.PI, (Math.random() - 0.5) * 2));
+  sizes.push(Math.random() * 1.5 + 0.5);
+  pushShift();
+}
+
+let g = new THREE.BufferGeometry().setFromPoints(pts);
+g.setAttribute("sizes", new THREE.Float32BufferAttribute(sizes, 1));
+g.setAttribute("shift", new THREE.Float32BufferAttribute(shift, 4));
+
+let m = new THREE.PointsMaterial({
+  size: 0.125,
+  transparent: true,
+  depthTest: false,
+  blending: THREE.AdditiveBlending,
+  onBeforeCompile: shader => {
+    shader.uniforms.time = gu.time;
+    shader.vertexShader = `
+      uniform float time;
+      attribute float sizes;
+      attribute vec4 shift;
+      varying vec3 vColor;
+      ${shader.vertexShader}
+    `.replace(
+      `gl_PointSize = size;`,
+      `gl_PointSize = size * sizes;`
+    ).replace(
+      `#include <color_vertex>`,
+      `#include <color_vertex>
+      float d = length(abs(position)/vec3(40.,10.,40));
+      d=clamp(d,0.,1.);
+      vColor = mix(vec3(227.,155.,0.),vec3(100.,50.,255.),d)/255.;`
+    ).replace(
+      `#include <begin_vertex>`,
+      `#include <begin_vertex>
+      float t = time;
+      float moveT = mod(shift.x + shift.z * t,PI2);
+      float moveS = mod(shift.y + shift.z * t,PI2);
+      transformed += vec3(cos(moveS) * sin(moveT),cos(moveT),sin(moveS)*sin(moveT)) * shift.w;`
+    );
+    shader.fragmentShader = `
+      varying vec3 vColor;
+      ${shader.fragmentShader}
+    `.replace(
+      `#include <clipping_planes_fragment>`,
+      `#include <clipping_planes_fragment>
+      float d = length(gl_PointCoord.xy - 0.5);`
+    ).replace(
+      `vec4 diffuseColor = vec4( diffuse, opacity );`,
+      `vec4 diffuseColor = vec4( vColor, smoothstep(0.5, 0.1, d) );`
+    );
+  }
+});
+
+let stars = new THREE.Points(g, m);
+stars.rotation.order = "ZYX";
+stars.rotation.z = 0.2;
+scene.add(stars);
+
+let clock = new THREE.Clock();
+
+// 花瓣
+function petal() {
+  let w = document.querySelector('.petal-wrap');
+  let p = document.createElement('div');
+  p.className = 'petal';
+  let s = Math.random() * 8 + 5;
+  p.style.width = s + 'px';
+  p.style.height = s + 'px';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.animationDuration = Math.random() * 5 + 6 + 's';
+  w.appendChild(p);
+  setTimeout(() => p.remove(), 12000);
+}
+setInterval(petal, 500);
+
+// 爱心
+let h = [];
+let hCanvas = document.getElementById('heartCanvas');
+let hCtx = hCanvas.getContext('2d');
+function resizeH() { hCanvas.width = innerWidth; hCanvas.height = innerHeight; }
+resizeH(); window.onresize = resizeH;
+
+window.onmousemove = e => {
+  h.push({ x: e.x, y: e.y, s: 6, a: 1 });
+};
+
+function drawH() {
+  hCtx.clearRect(0,0,hCanvas.width,hCanvas.height);
+  h.forEach((o,i) => {
+    hCtx.save();
+    hCtx.globalAlpha = o.a;
+    hCtx.fillStyle = '#ff8fb8';
+    hCtx.beginPath();
+    hCtx.moveTo(o.x,o.y);
+    hCtx.bezierCurveTo(o.x-o.s,o.y-o.s*1.5, o.x-o.s*1.5,o.y+o.s/2, o.x,o.y+o.s);
+    hCtx.bezierCurveTo(o.x+o.s*1.5,o.y+o.s/2, o.x+o.s,o.y-o.s*1.5, o.x,o.y);
+    hCtx.fill();
+    hCtx.restore();
+    o.s += 0.15;
+    o.a -= 0.015;
+    if (o.a <= 0) h.splice(i,1);
+  });
+  requestAnimationFrame(drawH);
+}
+drawH();
+
+// 渲染（只旋转星空，文字静止，营造探索感）
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  let t = clock.getElapsedTime() * 0.5;
+  gu.time.value = t * Math.PI;
+  stars.rotation.y = t * 0.05; // 只有星空缓慢旋转
+  renderer.render(scene, camera);
+}
+animate();
 </script>
+
 </body>
 </html>
