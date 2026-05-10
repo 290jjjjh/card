@@ -364,57 +364,85 @@ function initBgm() {
   if (audioCtx) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   masterGain = audioCtx.createGain();
-  masterGain.gain.value = 0.001;
+  masterGain.gain.value = 0.0001;
   masterGain.connect(audioCtx.destination);
 
-  const createPad = (freq, detune, volume) => {
+  const createVoice = (type, freq, detune, gainValue, cutoff, q) => {
     const osc = audioCtx.createOscillator();
+    const filter = audioCtx.createBiquadFilter();
     const gain = audioCtx.createGain();
-    osc.type = 'triangle';
+    filter.type = 'lowpass';
+    filter.frequency.value = cutoff;
+    filter.Q.value = q;
+    osc.type = type;
     osc.frequency.value = freq;
     osc.detune.value = detune;
-    gain.gain.value = volume;
-    osc.connect(gain);
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.gain.value = gainValue;
     gain.connect(masterGain);
     osc.start();
+    return {osc, filter, gain};
   };
 
-  createPad(220, 0, 0.02);
-  createPad(277.18, 10, 0.018);
-  createPad(329.63, -8, 0.016);
+  createVoice('sawtooth', 261.63, -4, 0.016, 900, 5);
+  createVoice('triangle', 329.63, 5, 0.012, 1100, 2.5);
+  createVoice('sine', 392.00, -3, 0.01, 1000, 1.8);
 
-  const playBell = (freq, start) => {
+  const createPadPulse = (freq, start) => {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     const filter = audioCtx.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.frequency.value = 1200;
+    filter.frequency.value = 450;
+    filter.Q.value = 2;
     osc.type = 'sine';
     osc.frequency.value = freq;
     gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(0.08, start + 0.4);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + 3.5);
+    gain.gain.exponentialRampToValueAtTime(0.03, start + 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 1.5);
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(masterGain);
     osc.start(start);
-    osc.stop(start + 4);
+    osc.stop(start + 1.5);
   };
 
-  const scheduleBellLoop = () => {
+  const createBell = (freq, start, length = 3.5) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 1600;
+    filter.Q.value = 1.2;
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(0.08, start + 0.25);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + length);
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+    osc.start(start);
+    osc.stop(start + length);
+  };
+
+  const scheduleTrack = () => {
     const now = audioCtx.currentTime;
-    playBell(392.00, now + 0.2);
-    playBell(523.25, now + 1.6);
-    playBell(440.00, now + 3.0);
-    playBell(349.23, now + 4.6);
-    playBell(392.00, now + 6.2);
+    createPadPulse(110.00, now + 0.2);
+    createPadPulse(130.81, now + 1.2);
+    createPadPulse(146.83, now + 2.4);
+    createBell(659.25, now + 0.3, 4.2);
+    createBell(587.33, now + 1.8, 4.0);
+    createBell(523.25, now + 3.2, 4.0);
+    createBell(440.00, now + 4.8, 3.8);
+    createBell(392.00, now + 6.3, 4.2);
   };
 
-  scheduleBellLoop();
-  bgmPulse = setInterval(scheduleBellLoop, 6200);
-  setTimeout(() => {
-    masterGain.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 5);
-  }, 20);
+  scheduleTrack();
+  bgmPulse = setInterval(scheduleTrack, 7800);
+
+  masterGain.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 4);
 }
 
 window.addEventListener('pointerdown', () => {
