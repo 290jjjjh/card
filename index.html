@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>母亲节快乐 · 在星空中寻找爱</title>
+<title>母亲节快乐 · 星空中的祝福</title>
 <style>
 * {
   margin: 0;
@@ -53,6 +53,20 @@ body {
   pointer-events: none;
   z-index: 5;
 }
+
+/* 提示文字 */
+.tip {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(255,255,255,0.7);
+  font-size: 18px;
+  text-align: center;
+  pointer-events: none;
+  z-index: 3;
+  transition: opacity 1s;
+}
 </style>
 </head>
 
@@ -61,12 +75,13 @@ body {
 <canvas id="threeCanvas"></canvas>
 <div class="petal-wrap"></div>
 <canvas id="heartCanvas"></canvas>
+<div class="tip">拖动屏幕，在星空中寻找祝福 ✨</div>
 
 <script type="module">
 import * as THREE from "https://cdn.skypack.dev/three@0.136.0";
 import { OrbitControls } from "https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls";
 
-// 星空场景
+// 场景
 let scene = new THREE.Scene();
 scene.background = new THREE.Color(0x100020);
 
@@ -83,75 +98,55 @@ window.addEventListener("resize", () => {
   renderer.setSize(innerWidth, innerHeight);
 });
 
-// 3D交互控制
+// 手势控制（拖拽旋转视角）
 let controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.enablePan = false;
-controls.rotateSpeed = 0.4;
+controls.rotateSpeed = 0.5;
 controls.minDistance = 12;
 controls.maxDistance = 45;
+controls.autoRotate = false;
 
 // ==========================
-// 核心改造：文字分散融入3D星空空间
+// 隐藏的文字面板（初始不在视野 + 完全透明）
 // ==========================
-const messageTexts = [
-  "母亲节快乐",
-  "妈妈，希望您永远不要被“母亲”这个标签所困",
-  "你就应该开心地做自己",
-  "尽情享受作为一个女性的爱与美",
-  "想去看世界便去看世界",
-  "想体验什么便大胆去体验",
-  "不必被目标限制住自己的人生轨迹",
-  "最后，希望您健康、平安、快乐！"
-];
+const cardGroup = new THREE.Group();
+cardGroup.position.set(0, 0, -30);
+scene.add(cardGroup);
 
-const textGroup = new THREE.Group();
-scene.add(textGroup);
+// 祝福文字画布（无白底）
+const textCanvas = document.createElement('canvas');
+const ctxText = textCanvas.getContext('2d');
+textCanvas.width = 1024;
+textCanvas.height = 768;
 
-// 生成3D空间文字（随机分布在星空里）
-function createSpaceText() {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = 256;
-  canvas.height = 64;
+// 绘制文字
+ctxText.fillStyle = '#ffd1e8';
+ctxText.font = '60px Arial';
+ctxText.textAlign = 'center';
+ctxText.fillText('母亲节快乐', 512, 120);
 
-  messageTexts.forEach((text, lineIndex) => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#ff99bb';
-    ctx.font = 'bold 28px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(text, 128, 40);
+ctxText.font = '40px Arial';
+ctxText.fillStyle = '#ffc0dd';
+ctxText.fillText('妈妈，希望您永远不要被“母亲”这个标签所困', 512, 220);
+ctxText.fillText('你就应该开心地做自己', 512, 280);
+ctxText.fillText('尽情享受作为一个女性的爱与美', 512, 340);
+ctxText.fillText('想去看世界便去看世界', 512, 400);
+ctxText.fillText('想体验什么便大胆去体验', 512, 460);
+ctxText.fillText('不必被目标限制住自己的人生轨迹', 512, 520);
+ctxText.fillText('最后，希望您健康、平安、快乐！', 512, 580);
 
-    const texture = new THREE.CanvasTexture(canvas);
-    const material = new THREE.MeshBasicMaterial({
-      map: texture,
-      transparent: true,
-      opacity: 0.9
-    });
+const textTexture = new THREE.CanvasTexture(textCanvas);
+const textMaterial = new THREE.MeshBasicMaterial({
+  map: textTexture,
+  transparent: true,
+  opacity: 0,
+  depthWrite: false
+});
 
-    const plane = new THREE.Mesh(
-      new THREE.PlaneGeometry(8, 2),
-      material
-    );
-
-    // 随机3D空间位置（散落在星空里）
-    plane.position.set(
-      (Math.random() - 0.5) * 60,
-      (Math.random() - 0.5) * 30,
-      (Math.random() - 0.5) * 60
-    );
-
-    // 随机角度，更自然融入空间
-    plane.rotation.set(
-      (Math.random() - 0.5) * Math.PI * 0.3,
-      (Math.random() - 0.5) * Math.PI * 0.5,
-      (Math.random() - 0.5) * Math.PI * 0.2
-    );
-
-    textGroup.add(plane);
-  });
-}
-createSpaceText();
+const planeGeometry = new THREE.PlaneGeometry(14, 10);
+const textPlane = new THREE.Mesh(planeGeometry, textMaterial);
+cardGroup.add(textPlane);
 
 // ==========================
 // 星空粒子
@@ -201,34 +196,22 @@ let m = new THREE.PointsMaterial({
       attribute vec4 shift;
       varying vec3 vColor;
       ${shader.vertexShader}
-    `.replace(
-      `gl_PointSize = size;`,
-      `gl_PointSize = size * sizes;`
-    ).replace(
-      `#include <color_vertex>`,
-      `#include <color_vertex>
+    `.replace(`gl_PointSize = size;`, `gl_PointSize = size * sizes;`)
+    .replace(`#include <color_vertex>`, `#include <color_vertex>
       float d = length(abs(position)/vec3(40.,10.,40));
       d=clamp(d,0.,1.);
-      vColor = mix(vec3(227.,155.,0.),vec3(100.,50.,255.),d)/255.;`
-    ).replace(
-      `#include <begin_vertex>`,
-      `#include <begin_vertex>
+      vColor = mix(vec3(227.,155.,0.),vec3(100.,50.,255.),d)/255.;`)
+    .replace(`#include <begin_vertex>`, `#include <begin_vertex>
       float t = time;
       float moveT = mod(shift.x + shift.z * t,PI2);
       float moveS = mod(shift.y + shift.z * t,PI2);
-      transformed += vec3(cos(moveS) * sin(moveT),cos(moveT),sin(moveS)*sin(moveT)) * shift.w;`
-    );
+      transformed += vec3(cos(moveS) * sin(moveT),cos(moveT),sin(moveS)*sin(moveT)) * shift.w;`);
     shader.fragmentShader = `
       varying vec3 vColor;
       ${shader.fragmentShader}
-    `.replace(
-      `#include <clipping_planes_fragment>`,
-      `#include <clipping_planes_fragment>
-      float d = length(gl_PointCoord.xy - 0.5);`
-    ).replace(
-      `vec4 diffuseColor = vec4( diffuse, opacity );`,
-      `vec4 diffuseColor = vec4( vColor, smoothstep(0.5, 0.1, d) );`
-    );
+    `.replace(`#include <clipping_planes_fragment>`, `#include <clipping_planes_fragment>
+      float d = length(gl_PointCoord.xy - 0.5);`)
+    .replace(`vec4 diffuseColor = vec4( diffuse, opacity );`, `vec4 diffuseColor = vec4( vColor, smoothstep(0.5, 0.1, d) );`);
   }
 });
 
@@ -238,6 +221,8 @@ stars.rotation.z = 0.2;
 scene.add(stars);
 
 let clock = new THREE.Clock();
+let tip = document.querySelector('.tip');
+let isFound = false;
 
 // 花瓣
 function petal() {
@@ -254,7 +239,7 @@ function petal() {
 }
 setInterval(petal, 500);
 
-// 爱心
+// 鼠标爱心
 let h = [];
 let hCanvas = document.getElementById('heartCanvas');
 let hCtx = hCanvas.getContext('2d');
@@ -285,13 +270,29 @@ function drawH() {
 }
 drawH();
 
-// 渲染（只旋转星空，文字静止，营造探索感）
+// 渲染：视角靠近文字时 发光显现
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
   let t = clock.getElapsedTime() * 0.5;
   gu.time.value = t * Math.PI;
-  stars.rotation.y = t * 0.05; // 只有星空缓慢旋转
+  stars.rotation.y = t * 0.05;
+
+  // 视角检测：转到后方 → 文字温柔发光显现
+  let angle = controls.getAzimuthalAngle();
+  if (angle < -1.2 && !isFound) {
+    isFound = true;
+    // 平滑渐显 + 发光效果
+    let fadeIn = () => {
+      if (textPlane.material.opacity < 1) {
+        textPlane.material.opacity += 0.012;
+        requestAnimationFrame(fadeIn);
+      }
+    };
+    fadeIn();
+    tip.style.opacity = 0;
+  }
+
   renderer.render(scene, camera);
 }
 animate();
