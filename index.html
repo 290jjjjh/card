@@ -14,6 +14,64 @@ body {
   overflow: hidden;
   background: radial-gradient(circle at top, #4b1c5e 0%, #12032a 40%, #050012 100%);
   color: #fff;
+  cursor: none;
+}
+
+.cursor-glow {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, rgba(255, 182, 193, 0.8) 0%, rgba(255, 182, 193, 0.2) 70%, transparent 100%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  transition: transform 0.1s ease;
+  mix-blend-mode: screen;
+}
+
+.firefly {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #ffd700;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700;
+  animation: firefly-glow 2s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes firefly-glow {
+  0% { opacity: 0.3; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.5); }
+}
+
+.meteor {
+  position: absolute;
+  width: 2px;
+  height: 80px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 100%);
+  transform-origin: center top;
+  animation: meteor-fall linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes meteor-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-100px) rotate(45deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) rotate(45deg);
+  }
 }
 
 #threeCanvas {
@@ -160,9 +218,8 @@ body {
 <body>
 
 <canvas id="threeCanvas"></canvas>
-<div class="petal-wrap"></div>
-<canvas id="heartCanvas"></canvas>
-<div class="tip"><span class="tip-main">向左拖动，寻找星空中的隐藏祝福 ✨</span><span class="hint">当提示变成“找到隐藏祝福”时，就靠近它。</span></div>
+<div class="petal-wrap"></div><div class="firefly-container"></div>
+<div class="meteor-container"></div><canvas id="heartCanvas"></canvas><div class="cursor-glow" id="cursorGlow"></div><div class="tip"><span class="tip-main">向左拖动，寻找星空中的隐藏祝福 ✨</span><span class="hint">当提示变成“找到隐藏祝福”时，就靠近它。</span></div>
 <div class="reader-overlay" id="readerOverlay">
   <div class="reader-card">
     <button class="reader-close" id="readerClose" aria-label="关闭阅读模式">×</button>
@@ -445,6 +502,10 @@ function initBgm() {
   masterGain.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 4);
 }
 
+// 初始化视觉效果
+createFireflies();
+setInterval(createMeteor, 8000); // 每8秒创建一个流星
+
 window.addEventListener('pointerdown', () => {
   if (!audioCtx) initBgm();
 }, { once: true });
@@ -509,6 +570,11 @@ resizeH(); window.onresize = resizeH;
 
 window.onmousemove = e => {
   h.push({ x: e.x, y: e.y, s: 6, a: 1 });
+
+  // 鼠标光效跟随
+  const cursorGlow = document.getElementById('cursorGlow');
+  cursorGlow.style.left = e.clientX - 10 + 'px';
+  cursorGlow.style.top = e.clientY - 10 + 'px';
 };
 
 function drawH() {
@@ -568,6 +634,38 @@ function animate() {
 
   renderer.render(scene, camera);
 }
+
+// 萤火虫效果
+function createFireflies() {
+  const fireflyContainer = document.querySelector('.firefly-container');
+  for (let i = 0; i < 8; i++) {
+    const firefly = document.createElement('div');
+    firefly.className = 'firefly';
+    firefly.style.left = Math.random() * 100 + '%';
+    firefly.style.top = Math.random() * 100 + '%';
+    firefly.style.animationDelay = Math.random() * 2 + 's';
+    fireflyContainer.appendChild(firefly);
+  }
+}
+
+// 流星效果
+function createMeteor() {
+  const meteorContainer = document.querySelector('.meteor-container');
+  const meteor = document.createElement('div');
+  meteor.className = 'meteor';
+  meteor.style.left = Math.random() * 100 + '%';
+  meteor.style.animationDuration = (Math.random() * 3 + 2) + 's';
+  meteor.style.animationDelay = Math.random() * 10 + 's';
+  meteorContainer.appendChild(meteor);
+
+  // 移除流星元素
+  setTimeout(() => {
+    if (meteor.parentNode) {
+      meteor.parentNode.removeChild(meteor);
+    }
+  }, 10000);
+}
+
 animate();
 </script>
 
