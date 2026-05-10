@@ -12,7 +12,8 @@
 }
 body {
   overflow: hidden;
-  background: #0a001a;
+  background: radial-gradient(circle at top, #4b1c5e 0%, #12032a 40%, #050012 100%);
+  color: #fff;
 }
 
 #threeCanvas {
@@ -22,6 +23,7 @@ body {
   width: 100%;
   height: 100%;
   z-index: 0;
+  filter: saturate(1.1) contrast(1.05);
 }
 
 .petal-wrap {
@@ -33,15 +35,35 @@ body {
 }
 .petal {
   position: absolute;
-  background: #ffb6c1;
-  border-radius: 50%;
-  opacity: 0.8;
+  width: 16px;
+  height: 18px;
+  background: radial-gradient(circle at 30% 30%, #ffe9f3 0%, #ff9ac7 50%, #ff5b9e 100%);
+  border-radius: 50% 50% 45% 55%;
+  opacity: 0.92;
+  box-shadow: 0 8px 25px rgba(255, 115, 170, 0.18);
+  transform: rotate(15deg);
   animation: fall linear infinite;
+  mix-blend-mode: screen;
+}
+.petal::before {
+  content: '';
+  position: absolute;
+  inset: 20% 15% 15% 15%;
+  background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.95), rgba(255,255,255,0) 65%);
+  border-radius: 50%;
 }
 @keyframes fall {
-  0% { opacity:0; }
-  10% { opacity:0.8; }
-  100% { transform: translateY(100vh) rotate(360deg); opacity:0; }
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) translateX(0px) rotate(0deg);
+  }
+  10% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(110vh) translateX(var(--dx, 0px)) rotate(360deg);
+    opacity: 0;
+  }
 }
 
 #heartCanvas {
@@ -132,6 +154,28 @@ body {
   cursor: pointer;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
 }
+.music-control {
+  position: fixed;
+  right: 18px;
+  top: 18px;
+  z-index: 6;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.18);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.music-control:hover {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.18);
+}
+.music-control.active {
+  background: rgba(255,255,255,0.22);
+}
 </style>
 </head>
 
@@ -140,6 +184,7 @@ body {
 <canvas id="threeCanvas"></canvas>
 <div class="petal-wrap"></div>
 <canvas id="heartCanvas"></canvas>
+<div class="music-control" id="musicControl">播放BGM</div>
 <div class="tip"><span class="tip-main">向左拖动，寻找星空中的隐藏祝福 ✨</span><span class="hint">当提示变成“找到隐藏祝福”时，就靠近它。</span></div>
 <div class="reader-overlay" id="readerOverlay">
   <div class="reader-card">
@@ -169,10 +214,19 @@ const canvas = document.getElementById("threeCanvas");
 let renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(innerWidth, innerHeight);
 
+function updateCardDepth() {
+  cardDepth = window.innerWidth <= 480 ? -20 : window.innerWidth <= 768 ? -22 : -30;
+  cardGroup.position.set(0, 0, cardDepth);
+  if (marker) {
+    marker.position.set(0, 0, cardDepth + 2);
+  }
+}
+
 window.addEventListener("resize", () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+  updateCardDepth();
 });
 
 // 手势控制（拖拽旋转视角）
@@ -188,7 +242,8 @@ controls.autoRotate = false;
 // 隐藏的文字面板（初始不在视野 + 完全透明）
 // ==========================
 const cardGroup = new THREE.Group();
-cardGroup.position.set(0, 0, -30);
+let cardDepth = window.innerWidth <= 480 ? -20 : window.innerWidth <= 768 ? -22 : -30;
+cardGroup.position.set(0, 0, cardDepth);
 scene.add(cardGroup);
 
 // 祝福文字画布（无白底）
@@ -303,6 +358,11 @@ let tipMain = tip.querySelector('.tip-main');
 let tipHint = tip.querySelector('.hint');
 let readerOverlay = document.getElementById('readerOverlay');
 let readerClose = document.getElementById('readerClose');
+let musicControl = document.getElementById('musicControl');
+let audioCtx = null;
+let masterGain = null;
+let bgmPlaying = false;
+let bgmPulse = null;
 let isFound = false;
 let readerOpen = false;
 
@@ -325,18 +385,106 @@ readerOverlay.addEventListener('click', e => {
   if (e.target === readerOverlay) hideReader();
 });
 
-renderer.domElement.addEventListener('click', () => {
+function initBgm() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0.001;
+  masterGain.connect(audioCtx.destination);
+
+  const createPad = (freq, detune, volume) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    osc.detune.value = detune;
+    gain.gain.value = volume;
+    osc.connect(gain);
+    gain.connect(masterGain);
+    osc.start();
+  };
+
+  createPad(220, 0, 0.02);
+  createPad(277.18, 10, 0.018);
+  createPad(329.63, -8, 0.016);
+
+  const playBell = (freq, start) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 1200;
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(0.08, start + 0.4);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 3.5);
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+    osc.start(start);
+    osc.stop(start + 4);
+  };
+
+  const scheduleBellLoop = () => {
+    const now = audioCtx.currentTime;
+    playBell(392.00, now + 0.2);
+    playBell(523.25, now + 1.6);
+    playBell(440.00, now + 3.0);
+    playBell(349.23, now + 4.6);
+    playBell(392.00, now + 6.2);
+  };
+
+  scheduleBellLoop();
+  bgmPulse = setInterval(scheduleBellLoop, 6200);
+  setTimeout(() => {
+    masterGain.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 5);
+  }, 20);
+
+  bgmPlaying = true;
+  musicControl.classList.add('active');
+  musicControl.textContent = '暂停BGM';
+}
+
+function toggleBgm() {
+  if (!audioCtx) {
+    initBgm();
+    return;
+  }
+  if (!bgmPlaying) {
+    audioCtx.resume();
+    masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    masterGain.gain.setValueAtTime(masterGain.gain.value, audioCtx.currentTime);
+    masterGain.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 1.2);
+    musicControl.classList.add('active');
+    musicControl.textContent = '暂停BGM';
+    bgmPlaying = true;
+  } else {
+    masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    masterGain.gain.setValueAtTime(masterGain.gain.value, audioCtx.currentTime);
+    masterGain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 1.2);
+    musicControl.classList.remove('active');
+    musicControl.textContent = '播放BGM';
+    bgmPlaying = false;
+  }
+}
+
+musicControl.addEventListener('click', toggleBgm);
+
+function tryOpenReader() {
   if (isFound && !readerOpen) {
     showReader();
   }
-});
+}
+renderer.domElement.addEventListener('click', tryOpenReader);
+renderer.domElement.addEventListener('touchend', tryOpenReader, { passive: true });
 
 // 标记隐藏文字位置的辅助环
 const marker = new THREE.Mesh(
   new THREE.RingGeometry(1.4, 1.9, 64),
   new THREE.MeshBasicMaterial({ color: 0xff99cc, transparent: true, opacity: 0.55, side: THREE.DoubleSide })
 );
-marker.position.set(0, 0, -28);
+marker.position.set(0, 0, cardDepth + 2);
 marker.renderOrder = 1;
 scene.add(marker);
 
@@ -361,13 +509,16 @@ function petal() {
   let w = document.querySelector('.petal-wrap');
   let p = document.createElement('div');
   p.className = 'petal';
-  let s = Math.random() * 8 + 5;
+  let s = Math.random() * 10 + 6;
   p.style.width = s + 'px';
-  p.style.height = s + 'px';
+  p.style.height = s * 1.1 + 'px';
   p.style.left = Math.random() * 100 + '%';
-  p.style.animationDuration = Math.random() * 5 + 6 + 's';
+  p.style.opacity = 0.7 + Math.random() * 0.25;
+  p.style.animationDuration = Math.random() * 4 + 6 + 's';
+  p.style.animationDelay = Math.random() * -8 + 's';
+  p.style.setProperty('--dx', (Math.random() * 120 - 60) + 'px');
   w.appendChild(p);
-  setTimeout(() => p.remove(), 12000);
+  setTimeout(() => p.remove(), 14000);
 }
 setInterval(petal, 500);
 
