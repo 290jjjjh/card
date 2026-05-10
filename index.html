@@ -81,6 +81,57 @@ body {
   color: rgba(255,255,255,0.75);
   font-size: 14px;
 }
+.reader-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 0, 15, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.reader-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.reader-card {
+  position: relative;
+  width: min(840px, 100%);
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  background: rgba(255,255,255,0.98);
+  border-radius: 26px;
+  padding: 36px 44px;
+  box-shadow: 0 20px 80px rgba(0,0,0,0.24);
+}
+.reader-card h1 {
+  font-size: 2.4rem;
+  color: #2a2a2a;
+  margin-bottom: 24px;
+}
+.reader-card p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #333;
+  margin-bottom: 18px;
+}
+.reader-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: rgba(255,255,255,0.95);
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
 </style>
 </head>
 
@@ -90,6 +141,17 @@ body {
 <div class="petal-wrap"></div>
 <canvas id="heartCanvas"></canvas>
 <div class="tip"><span class="tip-main">向左拖动，寻找星空中的隐藏祝福 ✨</span><span class="hint">当提示变成“找到隐藏祝福”时，就靠近它。</span></div>
+<div class="reader-overlay" id="readerOverlay">
+  <div class="reader-card">
+    <button class="reader-close" id="readerClose" aria-label="关闭阅读模式">×</button>
+    <h1>母亲节快乐</h1>
+    <p>妈妈，希望您永远不要被“母亲”这个标签所困。</p>
+    <p>你就应该开心地做自己，尽情享受作为一个女性的爱与美。</p>
+    <p>想去看世界便去看世界，想体验什么便大胆去体验。</p>
+    <p>不必被目标限制住自己的人生轨迹。</p>
+    <p>最后，希望您健康、平安、快乐！</p>
+  </div>
+</div>
 
 <script type="module">
 import * as THREE from "https://cdn.skypack.dev/three@0.136.0";
@@ -238,7 +300,35 @@ let clock = new THREE.Clock();
 let tip = document.querySelector('.tip');
 let tipMain = tip.querySelector('.tip-main');
 let tipHint = tip.querySelector('.hint');
+let readerOverlay = document.getElementById('readerOverlay');
+let readerClose = document.getElementById('readerClose');
 let isFound = false;
+let readerOpen = false;
+
+function showReader() {
+  readerOverlay.classList.add('visible');
+  tip.classList.add('hidden');
+  readerOpen = true;
+}
+
+function hideReader() {
+  readerOverlay.classList.remove('visible');
+  readerOpen = false;
+  if (isFound) {
+    tip.classList.remove('hidden');
+  }
+}
+
+readerClose.addEventListener('click', hideReader);
+readerOverlay.addEventListener('click', e => {
+  if (e.target === readerOverlay) hideReader();
+});
+
+renderer.domElement.addEventListener('click', () => {
+  if (isFound && !readerOpen) {
+    showReader();
+  }
+});
 
 // 标记隐藏文字位置的辅助环
 const marker = new THREE.Mesh(
@@ -332,6 +422,10 @@ function animate() {
     isFound = true;
     marker.visible = false;
 
+    tipMain.textContent = '祝福已显现，点击屏幕展开全文阅读';
+    tipHint.textContent = '关闭后继续探索星空。';
+    tip.classList.remove('hidden');
+
     // 平滑渐显 + 发光效果
     let fadeIn = () => {
       if (textPlane.material.opacity < 1) {
@@ -340,7 +434,6 @@ function animate() {
       }
     };
     fadeIn();
-    tip.classList.add('hidden');
   }
 
   renderer.render(scene, camera);
